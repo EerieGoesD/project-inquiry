@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hey! Tell Me About Your Project</title>
+  <meta name="description" content="Quick form to help me understand what you need for your project.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #FAFAFA; --surface: #FFFFFF; --surface-hover: #F5F7FA;
+      --border: #E2E6ED; --border-focus: #1A1A1A;
+      --text: #1A1A1A; --text-secondary: #6B7280; --text-muted: #9CA3AF;
+      --accent: #1A1A1A; --accent-subtle: #F0F0F0;
+      --success: #059669; --success-bg: #ECFDF5; --error: #DC2626;
+      --radius: 10px; --radius-lg: 16px;
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.06);
+      --transition: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    html { font-size:16px; scroll-behavior:smooth; -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale; }
+    body { font-family:'DM Sans',-apple-system,BlinkMacSystemFont,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; min-height:100vh; }
+
+    .lang-switcher { position:fixed; top:1rem; left:1rem; display:flex; gap:0.4rem; z-index:200; background:var(--surface); border:1px solid var(--border); border-radius:100px; padding:0.3rem; box-shadow:var(--shadow-md); }
+    .lang-btn { width:36px; height:36px; border-radius:50%; border:2px solid transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:1.2rem; transition:all var(--transition); background:transparent; line-height:1; padding:0; }
+    .lang-btn:hover { background:var(--surface-hover); }
+    .lang-btn.active { border-color:var(--accent); background:var(--accent-subtle); box-shadow:0 0 0 2px rgba(26,26,26,0.08); }
+
+    .page-wrapper { max-width:720px; margin:0 auto; padding:2rem 1.25rem 4rem; }
+    @media (min-width:640px) { .page-wrapper { padding:3rem 2rem 5rem; } }
+
+    .header { text-align:center; margin-bottom:3rem; animation:fadeUp 0.6s ease both; }
+    .header__badge { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:500; letter-spacing:0.12em; text-transform:uppercase; color:var(--text-secondary); background:var(--accent-subtle); padding:0.35rem 1rem; border-radius:100px; margin-bottom:1.5rem; }
+    .header h1 { font-size:clamp(1.75rem,5vw,2.5rem); font-weight:700; letter-spacing:-0.03em; line-height:1.15; margin-bottom:0.75rem; }
+    .header p { font-size:1.05rem; color:var(--text-secondary); max-width:480px; margin:0 auto; font-weight:300; }
+
+    .eerie-link { display:inline-flex; align-items:center; gap:0.35rem; font-family:'JetBrains Mono',monospace; font-size:0.72rem; font-weight:500; letter-spacing:0.06em; color:var(--text-muted); text-decoration:none; margin-top:1rem; padding:0.3rem 0.8rem; border-radius:100px; border:1px solid var(--border); transition:all var(--transition); }
+    .eerie-link:hover { color:var(--text); border-color:var(--accent); background:var(--accent-subtle); }
+    .eerie-link svg { width:12px; height:12px; stroke:currentColor; stroke-width:2; fill:none; }
+
+    .progress-wrap { position:sticky; top:0; z-index:100; background:rgba(250,250,250,0.85); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); padding:1rem 0 0.75rem; margin-bottom:1.5rem; animation:fadeUp 0.6s ease 0.15s both; }
+    .progress-steps { display:flex; align-items:center; gap:0; position:relative; }
+    .progress-step { flex:1; display:flex; flex-direction:column; align-items:center; position:relative; cursor:pointer; }
+    .progress-step__dot { width:10px; height:10px; border-radius:50%; background:var(--border); border:2px solid var(--border); transition:all var(--transition); position:relative; z-index:2; }
+    .progress-step.active .progress-step__dot { background:var(--accent); border-color:var(--accent); box-shadow:0 0 0 4px rgba(26,26,26,0.1); }
+    .progress-step.completed .progress-step__dot { background:var(--success); border-color:var(--success); }
+    .progress-step__label { font-size:0.65rem; font-weight:500; color:var(--text-muted); margin-top:0.4rem; text-transform:uppercase; letter-spacing:0.06em; transition:color var(--transition); text-align:center; white-space:nowrap; }
+    .progress-step.active .progress-step__label { color:var(--text); }
+    .progress-step.completed .progress-step__label { color:var(--success); }
+    .progress-line { position:absolute; top:5px; left:0; right:0; height:2px; background:var(--border); z-index:1; }
+    .progress-line__fill { height:100%; background:var(--accent); transition:width 0.4s cubic-bezier(0.4,0,0.2,1); }
+    @media (max-width:520px) { .progress-step__label { font-size:0.5rem; letter-spacing:0; } }
+
+    .form-section { display:none; animation:fadeUp 0.4s ease both; }
+    .form-section.active { display:block; }
+    .section-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius-lg); padding:2rem 1.5rem; box-shadow:var(--shadow-sm); }
+    @media (min-width:640px) { .section-card { padding:2.5rem 2rem; } }
+    .section-card__header { margin-bottom:2rem; padding-bottom:1.25rem; border-bottom:1px solid var(--border); }
+    .section-card__number { font-family:'JetBrains Mono',monospace; font-size:0.7rem; font-weight:500; color:var(--text-muted); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; }
+    .section-card__title { font-size:1.35rem; font-weight:700; letter-spacing:-0.02em; }
+    .section-card__subtitle { font-size:0.9rem; color:var(--text-secondary); margin-top:0.35rem; font-weight:300; }
+
+    .field { margin-bottom:1.5rem; }
+    .field:last-child { margin-bottom:0; }
+    .field__label { display:block; font-size:0.85rem; font-weight:600; color:var(--text); margin-bottom:0.4rem; }
+    .field__hint { font-size:0.78rem; color:var(--text-muted); margin-bottom:0.5rem; font-weight:300; }
+    .field__input, .field__textarea, .field__select { width:100%; font-family:inherit; font-size:0.95rem; color:var(--text); background:var(--surface); border:1.5px solid var(--border); border-radius:var(--radius); padding:0.7rem 0.9rem; transition:all var(--transition); outline:none; }
+    .field__input:hover, .field__textarea:hover, .field__select:hover { border-color:#CDD3DC; }
+    .field__input:focus, .field__textarea:focus, .field__select:focus { border-color:var(--border-focus); box-shadow:0 0 0 3px rgba(26,26,26,0.06); }
+    .field__textarea { resize:vertical; min-height:100px; }
+    .field__input::placeholder, .field__textarea::placeholder { color:var(--text-muted); font-weight:300; }
+
+    .checklist { display:flex; flex-direction:column; gap:0.5rem; }
+    .check-item { display:flex; align-items:flex-start; gap:0.85rem; padding:0.85rem 1rem; border:1.5px solid var(--border); border-radius:var(--radius); cursor:pointer; transition:all var(--transition); user-select:none; position:relative; }
+    .check-item:hover { border-color:#CDD3DC; background:var(--surface-hover); }
+    .check-item.selected { border-color:var(--accent); background:var(--accent-subtle); }
+    .check-item__box { width:20px; height:20px; min-width:20px; border:2px solid var(--border); border-radius:5px; display:flex; align-items:center; justify-content:center; transition:all var(--transition); margin-top:1px; }
+    .check-item.selected .check-item__box { background:var(--accent); border-color:var(--accent); }
+    .check-item__box svg { width:12px; height:12px; stroke:white; stroke-width:3; fill:none; opacity:0; transform:scale(0.5); transition:all var(--transition); }
+    .check-item.selected .check-item__box svg { opacity:1; transform:scale(1); }
+    .check-item__content { flex:1; }
+    .check-item__label { font-size:0.9rem; font-weight:500; color:var(--text); line-height:1.4; }
+    .check-item__desc { font-size:0.78rem; color:var(--text-muted); margin-top:0.15rem; font-weight:300; }
+    .check-item__detail { width:100%; margin-top:0.6rem; display:none; }
+    .check-item.selected .check-item__detail { display:block; }
+    .check-item__detail input { width:100%; font-family:inherit; font-size:0.82rem; color:var(--text); background:var(--surface); border:1.5px solid var(--border); border-radius:7px; padding:0.5rem 0.75rem; outline:none; transition:all var(--transition); }
+    .check-item__detail input:focus { border-color:var(--border-focus); box-shadow:0 0 0 3px rgba(26,26,26,0.06); }
+
+    /* Project type cards */
+    .type-cards { display:grid; grid-template-columns:1fr; gap:0.75rem; }
+    @media (min-width:520px) { .type-cards { grid-template-columns:repeat(2,1fr); } }
+    .type-card { background:var(--surface); border:2px solid var(--border); border-radius:var(--radius-lg); padding:1.5rem 1.25rem; cursor:pointer; transition:all var(--transition); text-align:center; user-select:none; }
+    .type-card:hover { border-color:#CDD3DC; background:var(--surface-hover); transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .type-card.selected { border-color:var(--accent); background:var(--accent-subtle); box-shadow:0 0 0 3px rgba(26,26,26,0.08); }
+    .type-card__icon { font-size:2rem; margin-bottom:0.75rem; line-height:1; }
+    .type-card__title { font-size:0.95rem; font-weight:600; margin-bottom:0.25rem; }
+    .type-card__desc { font-size:0.75rem; color:var(--text-muted); font-weight:300; }
+
+    .nav-buttons { display:flex; justify-content:space-between; align-items:center; margin-top:2rem; gap:1rem; }
+    .btn { font-family:inherit; font-size:0.9rem; font-weight:600; border:none; border-radius:var(--radius); padding:0.75rem 1.75rem; cursor:pointer; transition:all var(--transition); display:inline-flex; align-items:center; gap:0.5rem; }
+    .btn--primary { background:var(--accent); color:#fff; }
+    .btn--primary:hover { background:#333; transform:translateY(-1px); box-shadow:var(--shadow-md); }
+    .btn--primary:disabled { background:#ccc; cursor:not-allowed; transform:none; box-shadow:none; }
+    .btn--secondary { background:transparent; color:var(--text-secondary); border:1.5px solid var(--border); }
+    .btn--secondary:hover { background:var(--surface-hover); color:var(--text); }
+    .btn--submit { background:var(--success); color:#fff; padding:0.85rem 2.5rem; font-size:0.95rem; }
+    .btn--submit:hover { background:#047857; transform:translateY(-1px); box-shadow:0 4px 16px rgba(5,150,105,0.25); }
+    .btn svg { width:16px; height:16px; stroke:currentColor; stroke-width:2.5; fill:none; }
+
+    .success-screen { display:none; text-align:center; padding:3rem 1.5rem; animation:fadeUp 0.5s ease both; }
+    .success-screen.active { display:block; }
+    .success-icon { width:64px; height:64px; background:var(--success-bg); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem; }
+    .success-icon svg { width:28px; height:28px; stroke:var(--success); stroke-width:2.5; fill:none; }
+    .success-screen h2 { font-size:1.5rem; font-weight:700; margin-bottom:0.5rem; letter-spacing:-0.02em; }
+    .success-screen p { color:var(--text-secondary); font-weight:300; max-width:400px; margin:0 auto; }
+
+    .footer { text-align:center; margin-top:3rem; padding-top:1.5rem; border-top:1px solid var(--border); animation:fadeUp 0.6s ease 0.3s both; }
+    .footer p { font-size:0.78rem; color:var(--text-muted); font-weight:300; }
+
+    @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    .required::after { content:" *"; color:var(--error); font-weight:400; }
+    .field__error { font-size:0.78rem; color:var(--error); margin-top:0.3rem; display:none; }
+    .field.has-error .field__input, .field.has-error .field__textarea { border-color:var(--error); }
+    .field.has-error .field__error { display:block; }
+
+    /* Conditional visibility */
+    [data-for] { display:none !important; }
+    [data-for].visible { display:flex !important; }
+    .field[data-for].visible { display:block !important; }
+
+    @media (max-width:480px) {
+      .section-card { padding:1.5rem 1.15rem; }
+      .nav-buttons { flex-direction:column-reverse; }
+      .nav-buttons .btn { width:100%; justify-content:center; }
+      .lang-switcher { top:0.6rem; left:0.6rem; }
+      .lang-btn { width:32px; height:32px; font-size:1.05rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="lang-switcher">
+  <button class="lang-btn active" data-lang="en" title="English" onclick="setLang('en')">&#x1F1FA;&#x1F1F8;</button>
+  <button class="lang-btn" data-lang="pt" title="Portugu&#234;s" onclick="setLang('pt')">&#x1F1F5;&#x1F1F9;</button>
+</div>
+
+<div class="page-wrapper">
+  <header class="header">
+    <div class="header__badge" data-i18n="badge">New Project</div>
+    <h1><span data-i18n="title_1">What Are We</span><br><span data-i18n="title_2">Building?</span></h1>
+    <p data-i18n="header_desc">Answer a few quick questions so I know exactly what to build for you.</p>
+    <a href="https://eeriegoesd.com/" target="_blank" rel="noopener" class="eerie-link">
+      <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      EERIE
+    </a>
+  </header>
+
+  <nav class="progress-wrap" aria-label="Form progress">
+    <div class="progress-steps">
+      <div class="progress-line"><div class="progress-line__fill" id="progressFill"></div></div>
+      <div class="progress-step active" data-step="0"><div class="progress-step__dot"></div><span class="progress-step__label" data-i18n="prog_type">Project</span></div>
+      <div class="progress-step" data-step="1"><div class="progress-step__dot"></div><span class="progress-step__label" data-i18n="prog_about">About You</span></div>
+      <div class="progress-step" data-step="2"><div class="progress-step__dot"></div><span class="progress-step__label" data-i18n="prog_overview">Overview</span></div>
+      <div class="progress-step" data-step="3"><div class="progress-step__dot"></div><span class="progress-step__label" data-i18n="prog_features">Features</span></div>
+      <div class="progress-step" data-step="4"><div class="progress-step__dot"></div><span class="progress-step__label" data-i18n="prog_design">Design</span></div>
+      <div class="progress-step" data-step="5"><div class="progress-step__dot"></div><span class="progress-step__label" data-i18n="prog_legal">Legal</span></div>
+      <div class="progress-step" data-step="6"><div class="progress-step__dot"></div><span class="progress-step__label" data-i18n="prog_tech">Technical</span></div>
+      <div class="progress-step" data-step="7"><div class="progress-step__dot"></div><span class="progress-step__label" data-i18n="prog_budget">Budget</span></div>
+    </div>
+  </nav>
+
+  <form id="mainForm" action="https://formspree.io/f/xjgaorvg" method="POST">
+
+    <!-- ══ Step 0: Project Type ══ -->
+    <div class="form-section active" data-section="0">
+      <div class="section-card">
+        <div class="section-card__header">
+          <div class="section-card__number" data-i18n="step_1_of_8">Step 1 of 8</div>
+          <h2 class="section-card__title" data-i18n="s_type_title">What are we building?</h2>
+          <p class="section-card__subtitle" data-i18n="s_type_sub">Pick the one that best describes your project.</p>
+        </div>
+        <div class="type-cards">
+          <div class="type-card" data-type="website" onclick="selectType('website')">
+            <div class="type-card__icon">&#x1F310;</div>
+            <div class="type-card__title" data-i18n="type_website">Website</div>
+            <div class="type-card__desc" data-i18n="type_website_d">Business site, portfolio, blog, landing page, online store</div>
+          </div>
+          <div class="type-card" data-type="webapp" onclick="selectType('webapp')">
+            <div class="type-card__icon">&#x1F4BB;</div>
+            <div class="type-card__title" data-i18n="type_webapp">Web App</div>
+            <div class="type-card__desc" data-i18n="type_webapp_d">Browser-based tool, dashboard, platform, SaaS</div>
+          </div>
+          <div class="type-card" data-type="app" onclick="selectType('app')">
+            <div class="type-card__icon">&#x1F4F1;</div>
+            <div class="type-card__title" data-i18n="type_app">Mobile App</div>
+            <div class="type-card__desc" data-i18n="type_app_d">iOS, Android, or both</div>
+          </div>
+          <div class="type-card" data-type="desktop" onclick="selectType('desktop')">
+            <div class="type-card__icon">&#x1F5A5;</div>
+            <div class="type-card__title" data-i18n="type_desktop">Desktop Software</div>
+            <div class="type-card__desc" data-i18n="type_desktop_d">Windows, macOS, or Linux utility / tool</div>
+          </div>
+        </div>
+        <input type="hidden" name="project_type" id="projectType" value="">
+      </div>
+      <div class="nav-buttons"><div></div><button type="button" class="btn btn--primary" id="typeNextBtn" onclick="goNext()" disabled><span data-i18n="btn_continue">Continue</span><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+
+    <!-- ══ Step 1: About You ══ -->
+    <div class="form-section" data-section="1">
+      <div class="section-card">
+        <div class="section-card__header">
+          <div class="section-card__number" data-i18n="step_2_of_8">Step 2 of 8</div>
+          <h2 class="section-card__title" data-i18n="s0_title">About You</h2>
+          <p class="section-card__subtitle" data-i18n="s0_sub">Basic contact information so I can reach you.</p>
+        </div>
+        <div class="field"><label class="field__label required" for="fullName" data-i18n="s0_name">Full Name</label><input class="field__input" type="text" id="fullName" name="full_name" data-i18n-ph="s0_name_ph" placeholder="Your name" required><div class="field__error" data-i18n="s0_name_err">Please enter your name.</div></div>
+        <div class="field"><label class="field__label required" for="email" data-i18n="s0_email">Email Address</label><input class="field__input" type="email" id="email" name="email" placeholder="you@example.com" required><div class="field__error" data-i18n="s0_email_err">Please enter a valid email.</div></div>
+        <div class="field"><label class="field__label" for="phone" data-i18n="s0_phone">Phone Number</label><p class="field__hint" data-i18n="s0_phone_hint">Optional &#8212; useful if you prefer a quick call.</p><input class="field__input" type="tel" id="phone" name="phone" placeholder="+351 912 345 678"></div>
+        <div class="field"><label class="field__label" for="businessName" data-i18n="s0_business">Business / Brand Name</label><input class="field__input" type="text" id="businessName" name="business_name" data-i18n-ph="s0_business_ph" placeholder="Your company or brand"></div>
+        <div class="field"><label class="field__label" for="existingWebsite" data-i18n="s0_website">Existing Website or App</label><p class="field__hint" data-i18n="s0_website_hint">If you already have one, paste the URL or app store link.</p><input class="field__input" type="url" id="existingWebsite" name="existing_website" placeholder="https://..."></div>
+      </div>
+      <div class="nav-buttons"><button type="button" class="btn btn--secondary" onclick="goPrev()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-i18n="btn_back">Back</span></button><button type="button" class="btn btn--primary" onclick="goNext()"><span data-i18n="btn_continue">Continue</span><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+
+    <!-- ══ Step 2: Overview ══ -->
+    <div class="form-section" data-section="2">
+      <div class="section-card">
+        <div class="section-card__header">
+          <div class="section-card__number" data-i18n="step_3_of_8">Step 3 of 8</div>
+          <h2 class="section-card__title" data-i18n="s1_title">Project Overview</h2>
+          <p class="section-card__subtitle" data-i18n="s1_sub">Help me understand the big picture.</p>
+        </div>
+        <div class="field"><label class="field__label required" for="mainGoal" data-i18n="s1_goal">Main purpose of the project</label><p class="field__hint" data-i18n="s1_goal_hint">What should it accomplish for you?</p><textarea class="field__textarea" id="mainGoal" name="main_goal" data-i18n-ph="s1_goal_ph" placeholder="e.g. Sell products online, let customers book appointments, manage my team&#39;s tasks..." required></textarea></div>
+        <div class="field"><label class="field__label" for="targetAudience" data-i18n="s1_audience">Who is your target audience?</label><input class="field__input" type="text" id="targetAudience" name="target_audience" data-i18n-ph="s1_audience_ph" placeholder="e.g. Young adults aged 20-35 in Portugal"></div>
+        <div class="field"><label class="field__label" for="referenceWebsites" data-i18n="s1_refs">Apps or websites you like</label><p class="field__hint" data-i18n="s1_refs_hint">List 2-3 you admire and say what you like about them.</p><textarea class="field__textarea" id="referenceWebsites" name="reference_websites" data-i18n-ph="s1_refs_ph" placeholder="e.g. I like how clean apple.com looks, and Uber&#39;s app is really easy to use..."></textarea></div>
+      </div>
+      <div class="nav-buttons"><button type="button" class="btn btn--secondary" onclick="goPrev()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-i18n="btn_back">Back</span></button><button type="button" class="btn btn--primary" onclick="goNext()"><span data-i18n="btn_continue">Continue</span><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+
+    <!-- ══ Step 3: Features ══ -->
+    <div class="form-section" data-section="3">
+      <div class="section-card">
+        <div class="section-card__header">
+          <div class="section-card__number" data-i18n="step_4_of_8">Step 4 of 8</div>
+          <h2 class="section-card__title" data-i18n="s2_title">Features &amp; Functionality</h2>
+          <p class="section-card__subtitle" data-i18n="s2_sub">Select everything your project needs.</p>
+        </div>
+        <div class="checklist">
+          <!-- Universal features -->
+          <label class="check-item" data-name="feat_login"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_login">User Registration &amp; Login</div><div class="check-item__desc" data-i18n="f_login_d">Users can create accounts and sign in</div><div class="check-item__detail"><input type="text" name="feat_login_detail" data-i18n-ph="f_login_ph" placeholder="e.g. Google login, email/password..."></div></div><input type="hidden" name="feat_login" value=""></label>
+          <label class="check-item" data-name="feat_contact"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_contact">Contact Form</div><div class="check-item__desc" data-i18n="f_contact_d">A form for visitors to send you a message</div></div><input type="hidden" name="feat_contact" value=""></label>
+          <label class="check-item" data-name="feat_payments"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_pay">Online Payments</div><div class="check-item__desc" data-i18n="f_pay_d">Accept payments via credit card, PayPal, etc.</div><div class="check-item__detail"><input type="text" name="feat_payments_detail" data-i18n-ph="f_pay_ph" placeholder="e.g. Stripe, PayPal, MB WAY..."></div></div><input type="hidden" name="feat_payments" value=""></label>
+          <label class="check-item" data-name="feat_ecommerce" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_ecom">Shopping Cart / E-Commerce</div><div class="check-item__desc" data-i18n="f_ecom_d">Full online store with product listings and checkout</div></div><input type="hidden" name="feat_ecommerce" value=""></label>
+          <label class="check-item" data-name="feat_booking"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_book">Booking / Appointments</div><div class="check-item__desc" data-i18n="f_book_d">Users can schedule meetings or appointments</div></div><input type="hidden" name="feat_booking" value=""></label>
+          <label class="check-item" data-name="feat_blog" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_blog">Blog or News Section</div><div class="check-item__desc" data-i18n="f_blog_d">Regularly updated articles or posts</div></div><input type="hidden" name="feat_blog" value=""></label>
+          <label class="check-item" data-name="feat_gallery"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_gallery">Image Gallery / Portfolio</div><div class="check-item__desc" data-i18n="f_gallery_d">Showcase photos, artwork, or past work</div></div><input type="hidden" name="feat_gallery" value=""></label>
+          <label class="check-item" data-name="feat_social"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_social">Social Media Integration</div><div class="check-item__desc" data-i18n="f_social_d">Links or feeds from Instagram, Facebook, etc.</div></div><input type="hidden" name="feat_social" value=""></label>
+          <label class="check-item" data-name="feat_newsletter" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_news">Newsletter / Email Signup</div><div class="check-item__desc" data-i18n="f_news_d">Collect emails for marketing</div></div><input type="hidden" name="feat_newsletter" value=""></label>
+          <label class="check-item" data-name="feat_multilang"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_lang">Multi-Language Support</div><div class="check-item__desc" data-i18n="f_lang_d">Available in more than one language</div></div><input type="hidden" name="feat_multilang" value=""></label>
+          <label class="check-item" data-name="feat_search"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_search">Search Functionality</div><div class="check-item__desc" data-i18n="f_search_d">Users can search content</div></div><input type="hidden" name="feat_search" value=""></label>
+          <label class="check-item" data-name="feat_chat"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_chat">Live Chat / Support</div><div class="check-item__desc" data-i18n="f_chat_d">Real-time chat for user support</div></div><input type="hidden" name="feat_chat" value=""></label>
+          <label class="check-item" data-name="feat_uploads"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_upload">File Uploads</div><div class="check-item__desc" data-i18n="f_upload_d">Users can upload documents or images</div></div><input type="hidden" name="feat_uploads" value=""></label>
+          <label class="check-item" data-name="feat_admin"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_admin">Admin Dashboard</div><div class="check-item__desc" data-i18n="f_admin_d">A backend panel to manage content or users</div></div><input type="hidden" name="feat_admin" value=""></label>
+          <label class="check-item" data-name="feat_maps" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_maps">Maps / Location</div><div class="check-item__desc" data-i18n="f_maps_d">Embedded map showing business location</div></div><input type="hidden" name="feat_maps" value=""></label>
+          <label class="check-item" data-name="feat_reviews"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_reviews">Reviews / Testimonials</div><div class="check-item__desc" data-i18n="f_reviews_d">Display or collect customer feedback</div></div><input type="hidden" name="feat_reviews" value=""></label>
+          <label class="check-item" data-name="feat_analytics"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_analytics">Analytics / Tracking</div><div class="check-item__desc" data-i18n="f_analytics_d">Google Analytics or similar tracking</div></div><input type="hidden" name="feat_analytics" value=""></label>
+          <!-- App-only features -->
+          <label class="check-item" data-name="feat_push" data-for="app"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_push">Push Notifications</div><div class="check-item__desc" data-i18n="f_push_d">Send alerts and updates to users&#39; phones</div></div><input type="hidden" name="feat_push" value=""></label>
+          <label class="check-item" data-name="feat_offline" data-for="app"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_offline">Offline Mode</div><div class="check-item__desc" data-i18n="f_offline_d">App works without internet connection</div></div><input type="hidden" name="feat_offline" value=""></label>
+          <label class="check-item" data-name="feat_camera" data-for="app"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_camera">Camera / Photos</div><div class="check-item__desc" data-i18n="f_camera_d">Use phone camera or photo library</div></div><input type="hidden" name="feat_camera" value=""></label>
+          <label class="check-item" data-name="feat_gps" data-for="app"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="f_gps">GPS / Location Services</div><div class="check-item__desc" data-i18n="f_gps_d">Use device location for features like maps or delivery</div></div><input type="hidden" name="feat_gps" value=""></label>
+        </div>
+        <div class="field" style="margin-top:1.5rem;"><label class="field__label" for="otherFeatures" data-i18n="f_other">Any other features not listed?</label><textarea class="field__textarea" id="otherFeatures" name="other_features" data-i18n-ph="f_other_ph" placeholder="Describe anything else you need..."></textarea></div>
+      </div>
+      <div class="nav-buttons"><button type="button" class="btn btn--secondary" onclick="goPrev()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-i18n="btn_back">Back</span></button><button type="button" class="btn btn--primary" onclick="goNext()"><span data-i18n="btn_continue">Continue</span><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+
+    <!-- ══ Step 4: Design ══ -->
+    <div class="form-section" data-section="4">
+      <div class="section-card">
+        <div class="section-card__header">
+          <div class="section-card__number" data-i18n="step_5_of_8">Step 5 of 8</div>
+          <h2 class="section-card__title" data-i18n="s3_title">Content &amp; Design</h2>
+          <p class="section-card__subtitle" data-i18n="s3_sub">What you already have and how you want it to look.</p>
+        </div>
+        <div class="checklist">
+          <label class="check-item" data-name="has_logo"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="d_logo">I have a logo</div><div class="check-item__desc" data-i18n="d_logo_d">You can send the file separately</div></div><input type="hidden" name="has_logo" value=""></label>
+          <label class="check-item" data-name="has_colors"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="d_colors">I have brand colours</div><div class="check-item__detail"><input type="text" name="brand_colors" data-i18n-ph="d_colors_ph" placeholder="e.g. Navy blue and gold, #1A2B3C..."></div></div><input type="hidden" name="has_colors" value=""></label>
+          <label class="check-item" data-name="has_content"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="d_content">I have written content ready</div><div class="check-item__desc" data-i18n="d_content_d">Page text, descriptions, about us, etc.</div></div><input type="hidden" name="has_content" value=""></label>
+          <label class="check-item" data-name="has_photos"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="d_photos">I have professional photos</div><div class="check-item__desc" data-i18n="d_photos_d">Product shots, team photos, etc.</div></div><input type="hidden" name="has_photos" value=""></label>
+          <label class="check-item" data-name="needs_copywriting"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="d_copy">I need help writing content</div></div><input type="hidden" name="needs_copywriting" value=""></label>
+        </div>
+        <div class="field" style="margin-top:1.5rem;"><label class="field__label" for="designStyle" data-i18n="d_style">Describe the look and feel you want</label><p class="field__hint" data-i18n="d_style_hint">Think about mood, aesthetics, and first impressions.</p><textarea class="field__textarea" id="designStyle" name="design_style" data-i18n-ph="d_style_ph" placeholder="e.g. Modern and minimal, dark theme, playful and colourful..."></textarea></div>
+      </div>
+      <div class="nav-buttons"><button type="button" class="btn btn--secondary" onclick="goPrev()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-i18n="btn_back">Back</span></button><button type="button" class="btn btn--primary" onclick="goNext()"><span data-i18n="btn_continue">Continue</span><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+
+    <!-- ══ Step 5: Legal ══ -->
+    <div class="form-section" data-section="5">
+      <div class="section-card">
+        <div class="section-card__header">
+          <div class="section-card__number" data-i18n="step_6_of_8">Step 6 of 8</div>
+          <h2 class="section-card__title" data-i18n="s4_title">Legal &amp; Compliance</h2>
+          <p class="section-card__subtitle" data-i18n="s4_sub">This helps determine what legal pages and policies you need.</p>
+        </div>
+        <div class="checklist">
+          <label class="check-item" data-name="collects_data"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="l_data">Will collect personal data</div><div class="check-item__desc" data-i18n="l_data_d">Names, emails, phone numbers, addresses, etc.</div></div><input type="hidden" name="collects_data" value=""></label>
+          <label class="check-item" data-name="uses_cookies" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="l_cookies">Will use cookies or tracking</div><div class="check-item__desc" data-i18n="l_cookies_d">Analytics, ads, social media pixels</div></div><input type="hidden" name="uses_cookies" value=""></label>
+          <label class="check-item" data-name="processes_payments"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="l_payments">Will process payments</div></div><input type="hidden" name="processes_payments" value=""></label>
+          <label class="check-item" data-name="needs_terms"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="l_terms">Needs Terms &amp; Conditions</div></div><input type="hidden" name="needs_terms" value=""></label>
+          <label class="check-item" data-name="needs_privacy"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="l_privacy">Needs a Privacy Policy</div><div class="check-item__desc" data-i18n="l_privacy_d">Required by law if collecting data (GDPR)</div></div><input type="hidden" name="needs_privacy" value=""></label>
+          <label class="check-item" data-name="sells_to_eu"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="l_eu">Serves EU customers</div><div class="check-item__desc" data-i18n="l_eu_d">GDPR compliance is mandatory</div></div><input type="hidden" name="sells_to_eu" value=""></label>
+        </div>
+      </div>
+      <div class="nav-buttons"><button type="button" class="btn btn--secondary" onclick="goPrev()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-i18n="btn_back">Back</span></button><button type="button" class="btn btn--primary" onclick="goNext()"><span data-i18n="btn_continue">Continue</span><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+
+    <!-- ══ Step 6: Technical ══ -->
+    <div class="form-section" data-section="6">
+      <div class="section-card">
+        <div class="section-card__header">
+          <div class="section-card__number" data-i18n="step_7_of_8">Step 7 of 8</div>
+          <h2 class="section-card__title" data-i18n="s5_title">Technical</h2>
+          <p class="section-card__subtitle" data-i18n="s5_sub">Don&#39;t worry if you&#39;re unsure &#8212; we&#39;ll figure it out together.</p>
+        </div>
+        <div class="checklist">
+          <!-- Website / Web App -->
+          <label class="check-item" data-name="has_domain" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_domain">I already own a domain</div><div class="check-item__detail"><input type="text" name="existing_domain" data-i18n-ph="t_domain_ph" placeholder="e.g. mybusiness.pt"></div></div><input type="hidden" name="has_domain" value=""></label>
+          <label class="check-item" data-name="needs_domain" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_need_domain">I need a custom domain</div><div class="check-item__detail"><input type="text" name="desired_domain" data-i18n-ph="t_need_domain_ph" placeholder="e.g. mybrand.com, mybrand.pt..."></div></div><input type="hidden" name="needs_domain" value=""></label>
+          <label class="check-item" data-name="has_hosting" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_hosting">I have existing hosting</div><div class="check-item__detail"><input type="text" name="hosting_provider" data-i18n-ph="t_hosting_ph" placeholder="e.g. PTisp, OVH, GoDaddy..."></div></div><input type="hidden" name="has_hosting" value=""></label>
+          <label class="check-item" data-name="needs_ssl" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label">SSL / HTTPS</div><div class="check-item__desc" data-i18n="t_ssl_d">Secure connection &#8212; recommended for all sites</div></div><input type="hidden" name="needs_ssl" value=""></label>
+          <label class="check-item" data-name="needs_responsive" data-for="website webapp"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_responsive">Mobile-friendly (responsive)</div><div class="check-item__desc" data-i18n="t_responsive_d">Adapts to phones, tablets, and desktops</div></div><input type="hidden" name="needs_responsive" value=""></label>
+          <!-- Mobile App -->
+          <label class="check-item" data-name="app_ios" data-for="app"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_ios">iOS (iPhone / iPad)</div><div class="check-item__desc" data-i18n="t_ios_d">Published on the Apple App Store</div></div><input type="hidden" name="app_ios" value=""></label>
+          <label class="check-item" data-name="app_android" data-for="app"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_android">Android</div><div class="check-item__desc" data-i18n="t_android_d">Published on the Google Play Store</div></div><input type="hidden" name="app_android" value=""></label>
+          <label class="check-item" data-name="app_store_help" data-for="app"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_store">Need help with app store submission</div><div class="check-item__desc" data-i18n="t_store_d">Setting up developer accounts, publishing, etc.</div></div><input type="hidden" name="app_store_help" value=""></label>
+          <label class="check-item" data-name="app_backend" data-for="app webapp desktop"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_backend">Needs a backend / server</div><div class="check-item__desc" data-i18n="t_backend_d">For storing data, user accounts, APIs, etc.</div></div><input type="hidden" name="app_backend" value=""></label>
+          <!-- Desktop Software -->
+          <label class="check-item" data-name="desk_windows" data-for="desktop"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_windows">Windows</div><div class="check-item__desc" data-i18n="t_windows_d">Runs on Windows PCs</div></div><input type="hidden" name="desk_windows" value=""></label>
+          <label class="check-item" data-name="desk_macos" data-for="desktop"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_macos">macOS</div><div class="check-item__desc" data-i18n="t_macos_d">Runs on Mac computers</div></div><input type="hidden" name="desk_macos" value=""></label>
+          <label class="check-item" data-name="desk_linux" data-for="desktop"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_linux">Linux</div><div class="check-item__desc" data-i18n="t_linux_d">Runs on Linux distributions</div></div><input type="hidden" name="desk_linux" value=""></label>
+          <label class="check-item" data-name="desk_installer" data-for="desktop"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_installer">Needs an installer</div><div class="check-item__desc" data-i18n="t_installer_d">Setup wizard, or portable / no install needed?</div></div><input type="hidden" name="desk_installer" value=""></label>
+          <label class="check-item" data-name="desk_autoupdate" data-for="desktop"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_autoupdate">Auto-updates</div><div class="check-item__desc" data-i18n="t_autoupdate_d">Automatically download and install new versions</div></div><input type="hidden" name="desk_autoupdate" value=""></label>
+          <!-- Universal -->
+          <label class="check-item" data-name="needs_email"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_email">I need professional email</div><div class="check-item__desc">e.g. info@yourbusiness.com</div></div><input type="hidden" name="needs_email" value=""></label>
+          <label class="check-item" data-name="needs_maintenance"><div class="check-item__box"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div><div class="check-item__content"><div class="check-item__label" data-i18n="t_maint">Ongoing maintenance after launch</div><div class="check-item__desc" data-i18n="t_maint_d">Updates, backups, bug fixes, content changes</div></div><input type="hidden" name="needs_maintenance" value=""></label>
+        </div>
+      </div>
+      <div class="nav-buttons"><button type="button" class="btn btn--secondary" onclick="goPrev()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-i18n="btn_back">Back</span></button><button type="button" class="btn btn--primary" onclick="goNext()"><span data-i18n="btn_continue">Continue</span><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button></div>
+    </div>
+
+    <!-- ══ Step 7: Budget ══ -->
+    <div class="form-section" data-section="7">
+      <div class="section-card">
+        <div class="section-card__header">
+          <div class="section-card__number" data-i18n="step_8_of_8">Step 8 of 8</div>
+          <h2 class="section-card__title" data-i18n="s6_title">Budget &amp; Timeline</h2>
+          <p class="section-card__subtitle" data-i18n="s6_sub">This helps me tailor the proposal to your expectations.</p>
+        </div>
+        <div class="field"><label class="field__label" for="budget" data-i18n="b_budget">Approximate budget range</label><select class="field__select" id="budget" name="budget"><option value="" disabled selected data-i18n="b_budget_default">Select a range...</option><option value="under500" data-i18n="b_under500">Under &#8364;500</option><option value="500-1500">&#8364;500 &#8211; &#8364;1,500</option><option value="1500-3000">&#8364;1,500 &#8211; &#8364;3,000</option><option value="3000-5000">&#8364;3,000 &#8211; &#8364;5,000</option><option value="5000-10000">&#8364;5,000 &#8211; &#8364;10,000</option><option value="10000+">&#8364;10,000+</option><option value="unsure" data-i18n="b_unsure">Not sure yet</option></select></div>
+        <div class="field"><label class="field__label" for="urgency" data-i18n="b_urgency">How urgent is this?</label><select class="field__select" id="urgency" name="urgency"><option value="" disabled selected data-i18n="b_urgency_default">Select urgency...</option><option value="asap" data-i18n="b_asap">ASAP &#8212; I needed it yesterday</option><option value="soon" data-i18n="b_soon">Soon &#8212; within a few weeks</option><option value="moderate" data-i18n="b_moderate">Moderate &#8212; 1-2 months is fine</option><option value="relaxed" data-i18n="b_relaxed">No rush &#8212; whenever it&#39;s ready</option></select></div>
+        <div class="field"><label class="field__label" for="additionalNotes" data-i18n="b_notes">Anything else you&#39;d like me to know?</label><p class="field__hint" data-i18n="b_notes_hint">Special requirements, concerns, ideas &#8212; anything goes.</p><textarea class="field__textarea" id="additionalNotes" name="additional_notes" data-i18n-ph="b_notes_ph" placeholder="Write freely here..." style="min-height:140px;"></textarea></div>
+      </div>
+      <div class="nav-buttons"><button type="button" class="btn btn--secondary" onclick="goPrev()"><svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg><span data-i18n="btn_back">Back</span></button><button type="submit" class="btn btn--submit" id="submitBtn"><span data-i18n="btn_submit">Send It!</span><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></button></div>
+    </div>
+
+  </form>
+
+  <div class="success-screen" id="successScreen">
+    <div class="success-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+    <h2 data-i18n="success_title">Got it, thanks!</h2>
+    <p data-i18n="success_msg">I&#39;ve got your answers. I&#39;ll go through everything and hit you up soon with a plan and a price. Talk soon!</p>
+  </div>
+
+  <footer class="footer">
+    <p data-i18n="footer">Your info stays between us. I&#39;ll only use it for this project.</p>
+  </footer>
+</div>
+
+<script>
+const T={pt:{badge:"Novo Projeto",title_1:"O Que Tens",title_2:"Em Mente?",header_desc:"Responde a umas perguntas r\u00e1pidas para eu saber exatamente o que construir para ti.",prog_type:"Projeto",prog_about:"Sobre Ti",prog_overview:"Vis\u00e3o Geral",prog_features:"Funcionalidades",prog_design:"Design",prog_legal:"Legal",prog_tech:"T\u00e9cnico",prog_budget:"Or\u00e7amento",btn_continue:"Continuar",btn_back:"Voltar",btn_submit:"Enviar!",step_1_of_8:"Passo 1 de 8",step_2_of_8:"Passo 2 de 8",step_3_of_8:"Passo 3 de 8",step_4_of_8:"Passo 4 de 8",step_5_of_8:"Passo 5 de 8",step_6_of_8:"Passo 6 de 8",step_7_of_8:"Passo 7 de 8",step_8_of_8:"Passo 8 de 8",s_type_title:"O que vamos construir?",s_type_sub:"Escolhe o que melhor descreve o teu projeto.",type_website:"Website",type_website_d:"Site de neg\u00f3cio, portf\u00f3lio, blog, landing page, loja online",type_webapp:"Web App",type_webapp_d:"Ferramenta no browser, dashboard, plataforma, SaaS",type_app:"App M\u00f3vel",type_app_d:"iOS, Android, ou ambos",s0_title:"Sobre Ti",s0_sub:"Info b\u00e1sica de contacto para eu conseguir falar contigo.",s0_name:"Nome Completo",s0_name_ph:"O teu nome",s0_name_err:"Escreve o teu nome, por favor.",s0_email:"Endere\u00e7o de Email",s0_email_err:"Mete um email v\u00e1lido, por favor.",s0_phone:"N\u00famero de Telefone",s0_phone_hint:"Opcional \u2014 \u00fatil se preferires uma chamada r\u00e1pida.",s0_business:"Nome da Empresa / Marca",s0_business_ph:"A tua empresa ou marca",s0_website:"Website ou App Existente",s0_website_hint:"Se j\u00e1 tiveres, cola o URL ou link da app store.",s1_title:"Vis\u00e3o Geral do Projeto",s1_sub:"Ajuda-me a perceber o panorama geral.",s1_goal:"Objetivo principal do projeto",s1_goal_hint:"O que \u00e9 que deve fazer por ti?",s1_goal_ph:"Ex: Vender produtos online, permitir marca\u00e7\u00f5es de clientes, gerir tarefas da equipa...",s1_audience:"Qual \u00e9 o teu p\u00fablico-alvo?",s1_audience_ph:"Ex: Jovens adultos entre 20-35 anos em Portugal",s1_refs:"Apps ou websites que gostas",s1_refs_hint:"Lista 2-3 que admiras e diz o que gostas neles.",s1_refs_ph:"Ex: Gosto do aspeto limpo do apple.com e a app da Uber \u00e9 muito f\u00e1cil de usar...",s2_title:"Funcionalidades",s2_sub:"Seleciona tudo o que o teu projeto precisa.",f_login:"Registo e Login de Utilizadores",f_login_d:"Utilizadores podem criar contas e iniciar sess\u00e3o",f_login_ph:"Ex: Login com Google, email/palavra-passe...",f_contact:"Formul\u00e1rio de Contacto",f_contact_d:"Um formul\u00e1rio para te enviarem mensagens",f_pay:"Pagamentos Online",f_pay_d:"Aceitar pagamentos por cart\u00e3o, PayPal, etc.",f_pay_ph:"Ex: Stripe, PayPal, MB WAY...",f_ecom:"Carrinho de Compras / E-Commerce",f_ecom_d:"Loja online completa com produtos e checkout",f_book:"Reservas / Agendamentos",f_book_d:"Utilizadores podem marcar reuni\u00f5es ou consultas",f_blog:"Sec\u00e7\u00e3o de Blog ou Not\u00edcias",f_blog_d:"Artigos ou publica\u00e7\u00f5es atualizados regularmente",f_gallery:"Galeria de Imagens / Portf\u00f3lio",f_gallery_d:"Mostrar fotografias, obras ou trabalhos anteriores",f_social:"Integra\u00e7\u00e3o com Redes Sociais",f_social_d:"Links ou feeds do Instagram, Facebook, etc.",f_news:"Newsletter / Subscri\u00e7\u00e3o de Email",f_news_d:"Recolher emails para marketing",f_lang:"Suporte Multi-Idioma",f_lang_d:"Dispon\u00edvel em mais do que um idioma",f_search:"Funcionalidade de Pesquisa",f_search_d:"Utilizadores podem pesquisar conte\u00fado",f_chat:"Chat ao Vivo / Suporte",f_chat_d:"Chat em tempo real para apoio",f_upload:"Upload de Ficheiros",f_upload_d:"Utilizadores podem carregar documentos ou imagens",f_admin:"Painel de Administra\u00e7\u00e3o",f_admin_d:"Painel de gest\u00e3o de conte\u00fados ou utilizadores",f_maps:"Mapas / Localiza\u00e7\u00e3o",f_maps_d:"Mapa incorporado com a localiza\u00e7\u00e3o do neg\u00f3cio",f_reviews:"Avalia\u00e7\u00f5es / Testemunhos",f_reviews_d:"Mostrar ou recolher feedback de clientes",f_analytics:"Anal\u00edtica / Rastreamento",f_analytics_d:"Google Analytics ou rastreamento semelhante",f_push:"Notifica\u00e7\u00f5es Push",f_push_d:"Enviar alertas e atualiza\u00e7\u00f5es para o telem\u00f3vel",f_offline:"Modo Offline",f_offline_d:"A app funciona sem liga\u00e7\u00e3o \u00e0 internet",f_camera:"C\u00e2mara / Fotos",f_camera_d:"Usar c\u00e2mara do telem\u00f3vel ou galeria de fotos",f_gps:"GPS / Localiza\u00e7\u00e3o",f_gps_d:"Usar localiza\u00e7\u00e3o do dispositivo para mapas, entregas, etc.",f_other:"Outras funcionalidades n\u00e3o listadas?",f_other_ph:"Descreve qualquer outra coisa que precises...",s3_title:"Conte\u00fado e Design",s3_sub:"O que j\u00e1 tens preparado e como queres que fique.",d_logo:"Tenho log\u00f3tipo",d_logo_d:"Podes enviar o ficheiro \u00e0 parte",d_colors:"Tenho cores da marca",d_colors_ph:"Ex: Azul marinho e dourado, #1A2B3C...",d_content:"Tenho conte\u00fado escrito pronto",d_content_d:"Textos de p\u00e1ginas, descri\u00e7\u00f5es, sobre n\u00f3s, etc.",d_photos:"Tenho fotografias profissionais",d_photos_d:"Fotos de produtos, equipa, etc.",d_copy:"Preciso de ajuda a escrever conte\u00fado",d_style:"Descreve o aspeto e a vibe que queres",d_style_hint:"Pensa no ambiente, est\u00e9tica e primeiras impress\u00f5es.",d_style_ph:"Ex: Moderno e minimalista, tema escuro, divertido e colorido...",s4_title:"Legal e Conformidade",s4_sub:"Isto ajuda-me a perceber que p\u00e1ginas legais o teu projeto vai precisar.",l_data:"Vai recolher dados pessoais",l_data_d:"Nomes, emails, n\u00fameros de telefone, moradas, etc.",l_cookies:"Vai usar cookies ou rastreamento",l_cookies_d:"Anal\u00edtica, p\u00edxeis de publicidade, redes sociais",l_payments:"Vai processar pagamentos",l_terms:"Precisa de Termos e Condi\u00e7\u00f5es",l_privacy:"Precisa de Pol\u00edtica de Privacidade",l_privacy_d:"Obrigat\u00f3rio por lei se recolher dados (RGPD)",l_eu:"Serve clientes na UE",l_eu_d:"A conformidade com o RGPD \u00e9 obrigat\u00f3ria",s5_title:"T\u00e9cnico",s5_sub:"N\u00e3o te preocupes se tiveres d\u00favidas \u2014 vemos isso juntos.",t_domain:"J\u00e1 tenho um dom\u00ednio",t_domain_ph:"Ex: meunegocio.pt",t_need_domain:"Preciso de um dom\u00ednio personalizado",t_need_domain_ph:"Ex: minhamarca.com, minhamarca.pt...",t_hosting:"J\u00e1 tenho alojamento",t_hosting_ph:"Ex: PTisp, OVH, GoDaddy...",t_ssl_d:"Liga\u00e7\u00e3o segura \u2014 recomendado para todos os sites",t_responsive:"Adapt\u00e1vel a dispositivos m\u00f3veis (responsive)",t_responsive_d:"Adapta-se a telem\u00f3veis, tablets e computadores",t_ios:"iOS (iPhone / iPad)",t_ios_d:"Publicado na Apple App Store",t_android:"Android",t_android_d:"Publicado na Google Play Store",t_store:"Preciso de ajuda com a submiss\u00e3o na app store",t_store_d:"Configurar contas de developer, publicar, etc.",t_backend:"Precisa de backend / servidor",t_backend_d:"Para guardar dados, contas de utilizadores, APIs, etc.",t_email:"Preciso de email profissional",t_maint:"Manuten\u00e7\u00e3o cont\u00ednua ap\u00f3s o lan\u00e7amento",t_maint_d:"Atualiza\u00e7\u00f5es, c\u00f3pias de seguran\u00e7a, corre\u00e7\u00f5es, altera\u00e7\u00f5es",s6_title:"Or\u00e7amento e Prazos",s6_sub:"Isto ajuda-me a adequar a proposta ao que esperas.",b_budget:"Intervalo de or\u00e7amento aproximado",b_budget_default:"Seleciona um intervalo...",b_under500:"Menos de \u20ac500",b_unsure:"Ainda n\u00e3o sei",b_urgency:"Qual a urg\u00eancia?",b_urgency_default:"Seleciona a urg\u00eancia...",b_asap:"Urgente \u2014 precisava para ontem",b_soon:"Em breve \u2014 dentro de algumas semanas",b_moderate:"Moderado \u2014 1-2 meses est\u00e1 bem",b_relaxed:"Sem pressa \u2014 quando estiver pronto",b_notes:"Mais alguma coisa que queiras que eu saiba?",b_notes_hint:"Requisitos especiais, preocupa\u00e7\u00f5es, ideias \u2014 tudo serve.",b_notes_ph:"Escreve livremente aqui...",success_title:"Fixe, obrigado!",success_msg:"J\u00e1 recebi as tuas respostas. Vou ver tudo com calma e falo contigo em breve com um plano e um pre\u00e7o. At\u00e9 j\u00e1!",type_desktop:"Software Desktop",type_desktop_d:"Utilitário ou ferramenta para Windows, macOS ou Linux",t_windows:"Windows",t_windows_d:"Funciona em PCs com Windows",t_macos:"macOS",t_macos_d:"Funciona em computadores Mac",t_linux:"Linux",t_linux_d:"Funciona em distribuições Linux",t_installer:"Precisa de instalador",t_installer_d:"Assistente de instalação, ou portátil / sem instalação?",t_autoupdate:"Atualizações automáticas",t_autoupdate_d:"Descarregar e instalar novas versões automaticamente",footer:"As tuas informa\u00e7\u00f5es ficam entre n\u00f3s. S\u00f3 as uso para este projeto."}};
+
+const O={};
+document.querySelectorAll('[data-i18n]').forEach(el=>{O[el.getAttribute('data-i18n')]=el.textContent;});
+document.querySelectorAll('[data-i18n-ph]').forEach(el=>{O[el.getAttribute('data-i18n-ph')]=el.getAttribute('placeholder');});
+
+let currentLang='en';
+function setLang(lang){
+  currentLang=lang;document.documentElement.lang=lang==='pt'?'pt-PT':'en';
+  document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===lang));
+  document.querySelectorAll('[data-i18n]').forEach(el=>{const k=el.getAttribute('data-i18n');if(lang==='pt'&&T.pt[k])el.textContent=T.pt[k];else if(O[k])el.textContent=O[k];});
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{const k=el.getAttribute('data-i18n-ph');if(lang==='pt'&&T.pt[k])el.setAttribute('placeholder',T.pt[k]);else if(O[k])el.setAttribute('placeholder',O[k]);});
+  document.title=lang==='pt'?'O Que Tens Em Mente?':'Hey! Tell Me About Your Project';
+}
+
+// ══ Project type ══
+let projectType='';
+function selectType(type){
+  projectType=type;
+  document.getElementById('projectType').value=type;
+  document.querySelectorAll('.type-card').forEach(c=>c.classList.toggle('selected',c.dataset.type===type));
+  document.getElementById('typeNextBtn').disabled=false;
+  // Show/hide conditional items
+  document.querySelectorAll('[data-for]').forEach(el=>{
+    const types=el.getAttribute('data-for').split(' ');
+    el.classList.toggle('visible',types.includes(type));
+    // Deselect hidden check-items
+    if(!types.includes(type)){
+      el.classList.remove('selected');
+      const h=el.querySelector('input[type="hidden"]');
+      if(h)h.value='';
+    }
+  });
+}
+
+// ══ Form navigation ══
+let currentStep=0;const totalSteps=8;
+const sections=document.querySelectorAll('.form-section');
+const steps=document.querySelectorAll('.progress-step');
+const progressFill=document.getElementById('progressFill');
+
+function goTo(step){
+  if(step<0||step>=totalSteps)return;
+  if(step>currentStep&&!validateStep(currentStep))return;
+  sections[currentStep].classList.remove('active');sections[currentStep].style.display='none';
+  currentStep=step;
+  sections[currentStep].classList.add('active');sections[currentStep].style.display='block';
+  sections[currentStep].style.animation='none';sections[currentStep].offsetHeight;
+  sections[currentStep].style.animation='fadeUp 0.4s ease both';
+  updateProgress();window.scrollTo({top:0,behavior:'smooth'});
+}
+function goNext(){goTo(currentStep+1);}
+function goPrev(){goTo(currentStep-1);}
+
+function updateProgress(){
+  progressFill.style.width=(currentStep/(totalSteps-1))*100+'%';
+  steps.forEach((s,i)=>{s.classList.remove('active','completed');if(i<currentStep)s.classList.add('completed');if(i===currentStep)s.classList.add('active');});
+}
+steps.forEach(s=>{s.addEventListener('click',()=>{const t=parseInt(s.dataset.step);if(t<=currentStep)goTo(t);});});
+
+function validateStep(step){
+  if(step===0&&!projectType)return false;
+  const section=sections[step];const req=section.querySelectorAll('[required]');let valid=true;
+  req.forEach(f=>{const field=f.closest('.field');if(!f.value.trim()){if(field)field.classList.add('has-error');valid=false;}else{if(field)field.classList.remove('has-error');}});
+  return valid;
+}
+
+document.querySelectorAll('.field__input,.field__textarea,.field__select').forEach(el=>{el.addEventListener('input',()=>{const f=el.closest('.field');if(f)f.classList.remove('has-error');});});
+
+document.querySelectorAll('.check-item').forEach(item=>{
+  item.addEventListener('click',e=>{if(e.target.closest('.check-item__detail'))return;item.classList.toggle('selected');const h=item.querySelector('input[type="hidden"]');if(h)h.value=item.classList.contains('selected')?'yes':'';});
+  item.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();item.click();}});
+});
+document.querySelectorAll('.check-item__detail input').forEach(input=>{input.addEventListener('click',e=>e.stopPropagation());});
+
+document.getElementById('mainForm').addEventListener('submit',async e=>{
+  e.preventDefault();if(!validateStep(currentStep))return;
+  const btn=document.getElementById('submitBtn');const span=btn.querySelector('[data-i18n="btn_submit"]');
+  if(span)span.textContent=currentLang==='pt'?'A enviar...':'Submitting...';btn.disabled=true;
+  try{
+    const fd=new FormData(e.target);fd.append('language',currentLang);
+    const res=await fetch(e.target.action,{method:'POST',body:fd,headers:{'Accept':'application/json'}});
+    if(res.ok){document.getElementById('mainForm').style.display='none';document.querySelector('.progress-wrap').style.display='none';const s=document.getElementById('successScreen');s.classList.add('active');s.style.display='block';window.scrollTo({top:0,behavior:'smooth'});}
+    else throw new Error('fail');
+  }catch(err){
+    if(span)span.textContent=currentLang==='pt'?'Enviar!':'Send It!';btn.disabled=false;
+    alert(currentLang==='pt'?'Algo correu mal. Por favor, tenta novamente ou contacta-me diretamente.':'Something went wrong. Please try again or contact me directly.');
+  }
+});
+</script>
+</body>
+</html>
