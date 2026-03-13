@@ -470,10 +470,14 @@ document.getElementById('mainForm').addEventListener('submit',async e=>{
     const fd=new FormData(e.target);fd.append('language',currentLang);
     const res=await fetch(e.target.action,{method:'POST',body:fd,headers:{'Accept':'application/json'}});
     if(res.ok){document.getElementById('mainForm').style.display='none';document.querySelector('.progress-wrap').style.display='none';const s=document.getElementById('successScreen');s.classList.add('active');s.style.display='block';window.scrollTo({top:0,behavior:'smooth'});}
-    else throw new Error('fail');
+    else throw new Error('Server returned '+res.status);
   }catch(err){
+    console.error('Submit error:',err);
     if(span)span.textContent=currentLang==='pt'?'Enviar!':currentLang==='uk'?'Відправити!':'Send It!';btn.disabled=false;
-    alert(currentLang==='pt'?'Algo correu mal. Por favor, tenta novamente ou contacta-me diretamente.':currentLang==='uk'?'Щось пішло не так. Спробуй ще раз або напиши мені напряму.':'Something went wrong. Please try again or contact me directly.');
+    // Show error inline instead of alert (works in sandboxed environments)
+    let errDiv=document.getElementById('submitError');
+    if(!errDiv){errDiv=document.createElement('div');errDiv.id='submitError';errDiv.style.cssText='color:#DC2626;font-size:0.85rem;text-align:center;margin-top:1rem;';btn.parentElement.appendChild(errDiv);}
+    errDiv.textContent=currentLang==='pt'?'Algo correu mal. Tenta novamente ou contacta-me diretamente.':currentLang==='uk'?'Щось пішло не так. Спробуй ще раз або напиши мені напряму.':'Something went wrong. Try again or contact me directly.';
   }
 });
 </script>
